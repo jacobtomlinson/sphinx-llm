@@ -7,7 +7,7 @@ name = "sphinx-llm"
 dynamic = ["version"]
 description = ''
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { file = "LICENSE" }
 keywords = []
 authors = [{ name = "Jacob Tomlinson", email = "jacob@tomlinson.email" }]
@@ -22,7 +22,7 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = []
+dependencies = ["langchain-ollama>=0.2.0"]
 
 [project.urls]
 Documentation = "https://github.com/jacobtomlinson/sphinx-llm#readme"
