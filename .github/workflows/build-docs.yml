@@ -1,0 +1,61 @@
+name: Build Sphinx Docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      ollama:
+        image: ollama/ollama:latest
+        ports:
+          - 11400:11400
+        options: >-
+          --health-cmd "curl -f http://localhost:11400/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Wait for Ollama service to be healthy
+        run: |
+          until curl -s http://localhost:11400/health; do
+            echo "Waiting for Ollama service..."
+            sleep 5
+          done
+
+      - name: Pull the llama3.2:3b model
+        run: |
+          curl -X POST http://localhost:11400/models/pull -d '{"model": "llama3.2:3b"}'
+
+          # Wait for the model to be downloaded
+          until curl -s http://localhost:11400/models/llama3.2:3b; do
+            echo "Waiting for llama3.2:3b model..."
+            sleep 5
+          done
+
+      - name: Build Sphinx documentation
+        run: |
+          sphinx-build -b html docs docs/build/html
+
+      - name: Output test HTML page
+        run: |
+          cat docs/_build/html/test.html
