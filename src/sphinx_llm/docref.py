@@ -2,8 +2,9 @@ import os
 import hashlib
 from pathlib import Path
 
-from docutils.nodes import admonition
+from docutils.nodes import Text, admonition, inline, paragraph
 from docutils.parsers.rst.directives.admonitions import BaseAdmonition
+from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx
 from sphinx.util.docutils import SphinxDirective
 
@@ -19,7 +20,8 @@ class Docref(BaseAdmonition, SphinxDirective):
     def run(self):
         # Get the document name from the directive arguments
         [doc_name] = self.arguments
-        doc_title = self.state.document.settings.env.app.builder.env.get_doctree(doc_name).traverse(lambda n: n.tagname == "title")[0].astext()
+        doc_title = "See also: "
+        doc_title += self.state.document.settings.env.app.builder.env.get_doctree(doc_name).traverse(lambda n: n.tagname == "title")[0].astext()
         self.arguments = [doc_title]
 
         # Generate a summary of the document contents and replace the directive content with it
@@ -30,7 +32,25 @@ class Docref(BaseAdmonition, SphinxDirective):
         self.state.document.settings.env.note_dependency(doc_name)
 
         # Run the base admonition directive
-        return super().run()
+        nodes = super().run()
+
+        # Add a link to the document
+        custom_xref = pending_xref(
+            reftype="doc",
+            refdomain="std",
+            refexplicit=True,
+            reftarget=doc_name,
+            refdoc=self.env.docname,
+            refwarn=True,
+        )
+        text_wrapper = inline()
+        text_wrapper += Text("Read more >>")
+        custom_xref += text_wrapper
+        wrapper = paragraph()
+        wrapper["classes"] = ["visit-link"]
+        wrapper += custom_xref
+        nodes[0] += wrapper
+        return nodes
     
     def generate_summary(self, doc_name: str) -> str:
         # Get the document contents
@@ -49,7 +69,7 @@ class Docref(BaseAdmonition, SphinxDirective):
         # Generate a summary using the LLM
         llm_client = ChatOllama(
             base_url=os.environ["OLLAMA_BASE_URL"],
-            model="llama3:8b",
+            model="llama3.2:3b",
             temperature=0,
         )
         doc_summary = llm_client.invoke([("system", SYSTEM_PROMPT), ("human", doc_contents + "\n\nHere's a concise one-sentence summary of the above:")]).content
