@@ -22,7 +22,10 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["langchain-ollama>=0.2.0"]
+dependencies = [
+    "langchain-ollama>=0.2.0",
+    "sphinx>=7.4.7",
+]
 
 [project.urls]
 Documentation = "https://github.com/jacobtomlinson/sphinx-llm#readme"

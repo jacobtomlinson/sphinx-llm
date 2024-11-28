@@ -14,9 +14,9 @@ jobs:
       ollama:
         image: ollama/ollama:latest
         ports:
-          - 11400:11400
+          - 11434:11434
         options: >-
-          --health-cmd "curl -f http://localhost:11400 || exit 1"
+          --health-cmd "curl -f http://localhost:11434 || exit 1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 20
@@ -35,26 +35,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Wait for Ollama service to be healthy
-        run: |
-          until curl -s http://localhost:11400/health; do
-            echo "Waiting for Ollama service..."
-            sleep 5
-          done
-
       - name: Pull the llama3.2:3b model
         run: |
-          curl -X POST http://localhost:11400/models/pull -d '{"model": "llama3.2:3b"}'
-
-          # Wait for the model to be downloaded
-          until curl -s http://localhost:11400/models/llama3.2:3b; do
-            echo "Waiting for llama3.2:3b model..."
-            sleep 5
-          done
+          docker exec -it ollama ollama pull llama3.2:3b
 
       - name: Build Sphinx documentation
         run: |
-          sphinx-build -b html docs docs/build/html
+          sphinx-build -b html docs/source docs/build/html
 
       - name: Output test HTML page
         run: |
