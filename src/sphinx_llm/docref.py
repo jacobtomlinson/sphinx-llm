@@ -19,10 +19,15 @@ class Docref(BaseAdmonition, SphinxDirective):
     def run(self):
         # Get the document name from the directive arguments
         [doc_name] = self.arguments
+        doc_title = self.state.document.settings.env.app.builder.env.get_doctree(doc_name).traverse(lambda n: n.tagname == "title")[0].astext()
+        self.arguments = [doc_title]
 
         # Generate a summary of the document contents and replace the directive content with it
         summary = self.generate_summary(doc_name)
         self.content.data = [summary]
+
+        # Specify that this page should be rebuilt when the referenced document changes
+        self.state.document.settings.env.note_dependency(doc_name)
 
         # Run the base admonition directive
         return super().run()

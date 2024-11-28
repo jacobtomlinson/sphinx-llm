@@ -3,13 +3,13 @@ Feeding Apples to a Friendly Pig
 
 Introduction
 ------------
-Feeding apples to a friendly pig can be a delightful experience for both you and the pig. Pigs are intelligent and social animals that enjoy a variety of foods, including apples. This guide will walk you through the steps to safely and effectively feed apples to a pig.
+Feeding apples to a friendly pig can be a wonderful experience for both you and the pig. Pigs are intelligent and social animals that enjoy a variety of foods, including apples. This guide will walk you through the steps to safely and effectively feed apples to a pig.
 
 Steps to Feed Apples to a Pig
 -----------------------------
 
 1. **Choose the Right Apples**:
-    - Select fresh, ripe apples that are free from mold or rot.
+    - Select ripe apples that are free from mold or rot.
     - Avoid using apples that have been treated with pesticides or other chemicals.
 
 2. **Wash the Apples**:
@@ -39,6 +39,7 @@ Safety Tips
 - Always supervise the pig while it is eating to prevent choking or other issues.
 - Do not feed the pig too many apples at once, as excessive fruit consumption can lead to digestive problems.
 - Consult with a veterinarian if you have any concerns about the pig's diet or health.
+- Avoid telling the pig that you have more apples if you do not have any left, as this can lead to disappointment and frustration.
 
 Conclusion
 ----------
