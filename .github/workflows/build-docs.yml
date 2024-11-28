@@ -48,4 +48,4 @@ jobs:
 
       - name: Output test HTML page
         run: |
-          cat docs/_build/html/test.html
+          cat docs/build/html/test.html
