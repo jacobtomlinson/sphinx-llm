@@ -10,5 +10,11 @@
 ## Installation
 
 ```console
-pip install git+https://github.com/jacobtomlinson/sphinx-llm.git
+uv install git+https://github.com/jacobtomlinson/sphinx-llm.git
+```
+
+## Building the docs
+
+```console
+uv run --with sphinx-autobuild sphinx-autobuild docs/source docs/build/html
 ```
