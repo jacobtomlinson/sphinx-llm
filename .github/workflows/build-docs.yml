@@ -41,6 +41,8 @@ jobs:
           docker exec ollama ollama pull llama3.2:3b
 
       - name: Build Sphinx documentation
+        env:
+          OLLAMA_BASE_URL: http://localhost:11434
         run: |
           sphinx-build -b html docs/source docs/build/html
 
