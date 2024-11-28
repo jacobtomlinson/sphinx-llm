@@ -10,6 +10,9 @@ Welcome to sphinx-llm's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   test
+   apples
+
 
 
 Indices and tables
