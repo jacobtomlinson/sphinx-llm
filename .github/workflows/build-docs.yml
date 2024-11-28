@@ -16,7 +16,7 @@ jobs:
         ports:
           - 11434:11434
         options: >-
-          --health-cmd "curl -f http://localhost:11434 || exit 1"
+          --health-cmd "ollama ps"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 20
