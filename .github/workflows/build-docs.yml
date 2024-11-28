@@ -16,6 +16,7 @@ jobs:
         ports:
           - 11434:11434
         options: >-
+          --name ollama
           --health-cmd "ollama ps"
           --health-interval 10s
           --health-timeout 5s
