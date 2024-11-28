@@ -20,5 +20,5 @@
 ## Installation
 
 ```console
-pip install sphinx-llm
+pip install git+https://github.com/jacobtomlinson/sphinx-llm.git
 ```
