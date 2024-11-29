@@ -49,7 +49,7 @@ Testing page
    Summary of apples page.
 ```
 
-Then when you run `sphinx-build` (or `make html`) a summary will be generated and your source file will be updated.
+Then when you run `sphinx-build` (or `make html`) a summary will be generated and your source file will be updated too.
 
 ```rst
 Testing page
