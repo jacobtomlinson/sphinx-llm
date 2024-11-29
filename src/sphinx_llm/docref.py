@@ -7,11 +7,15 @@ from docutils.parsers.rst.directives.admonitions import BaseAdmonition
 from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx
 from sphinx.util.docutils import SphinxDirective
+from sphinx.util import logging
 
+logger = logging.getLogger(__name__)
 
+import ollama
 from langchain_ollama import ChatOllama
 
 SYSTEM_PROMPT = "Keep responses concise and focused, avoiding unnecessary elaboration or additional context unless explicitly requested. Do not use bullet points, lists, or nested structures unless specifically asked. If a response requires further detail, prioritize the most relevant information and conclude promptly. Avoid apologies or mentions of limitations; simply deliver the most direct and straightforward answer."
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 
 class Docref(BaseAdmonition, SphinxDirective):
     node_class = admonition
@@ -67,9 +71,11 @@ class Docref(BaseAdmonition, SphinxDirective):
             return env.sphinx_llm_cache[doc_hash]
 
         # Generate a summary using the LLM
+        model = "llama3.2:3b"
+        self.ensure_model(model)
         llm_client = ChatOllama(
-            base_url=os.environ["OLLAMA_BASE_URL"],
-            model="llama3.2:3b",
+            base_url=OLLAMA_BASE_URL,
+            model=model,
             temperature=0,
         )
         doc_summary = llm_client.invoke([("system", SYSTEM_PROMPT), ("human", doc_contents + "\n\nHere's a concise one-sentence summary of the above:")]).content
@@ -77,6 +83,17 @@ class Docref(BaseAdmonition, SphinxDirective):
         # Cache the summary and return it
         env.sphinx_llm_cache[doc_hash] = doc_summary
         return doc_summary
+    
+    def ensure_model(self, model: str):
+        # Check if the model is already loaded
+        ollama_client = ollama.Client(host=OLLAMA_BASE_URL)
+        try:
+            ollama_client.show(model)
+            return
+        except ollama.ResponseError:
+            logger.info(f"Model {model} not found, loading...")
+            ollama_client.pull(model)
+            logger.info(f"Pulled model {model}")
 
 
 

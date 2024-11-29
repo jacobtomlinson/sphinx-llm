@@ -36,13 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .
 
-      - name: Pull the llama3.2:3b model
-        run: |
-          docker exec ollama ollama pull llama3.2:3b
-
       - name: Build Sphinx documentation
-        env:
-          OLLAMA_BASE_URL: http://localhost:11434
         run: |
           sphinx-build -b html docs/source docs/build/html
 
