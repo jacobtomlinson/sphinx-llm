@@ -8,6 +8,7 @@ from sphinx.addnodes import pending_xref
 from sphinx.application import Sphinx
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util import logging
+from sphinx.errors import ExtensionError
 
 logger = logging.getLogger(__name__)
 
@@ -90,12 +91,16 @@ class Docref(BaseAdmonition, SphinxDirective):
         # Check if the model is already loaded
         ollama_client = ollama.Client(host=OLLAMA_BASE_URL)
         try:
-            ollama_client.show(model)
-            return
-        except ollama.ResponseError:
-            logger.info(f"Model {model} not found, loading...")
-            ollama_client.pull(model)
-            logger.info(f"Pulled model {model}")
+            ollama_client.ps()
+            try:
+                ollama_client.show(model)
+                return
+            except ollama.ResponseError:
+                logger.info(f"Model {model} not found, loading...")
+                ollama_client.pull(model)
+                logger.info(f"Pulled model {model}")
+        except Exception as e:
+            raise ExtensionError(f"Failed to connect to ollama at {OLLAMA_BASE_URL}", e, "sphinx-llm")
 
     def update_content(self, hash: str, summary: str):
         self.content.data = summary.splitlines()
