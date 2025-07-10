@@ -789,12 +789,16 @@ wheels = [
 
 [[package]]
 name = "sphinx-llm"
-version = "0.0.1"
+version = "0.1.1.dev0+g0ca49af.d20250710"
 source = { editable = "." }
 dependencies = [
-    { name = "langchain-ollama" },
     { name = "sphinx" },
     { name = "sphinx-markdown-builder" },
+]
+
+[package.optional-dependencies]
+gen = [
+    { name = "langchain-ollama" },
 ]
 
 [package.dev-dependencies]
@@ -805,7 +809,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "langchain-ollama", specifier = ">=0.2.0" },
+    { name = "langchain-ollama", marker = "extra == 'gen'", specifier = ">=0.2.0" },
     { name = "sphinx", specifier = ">=7.4.7" },
     { name = "sphinx-markdown-builder", specifier = ">=0.6.8" },
 ]

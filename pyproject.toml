@@ -23,9 +23,19 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-    "langchain-ollama>=0.2.0",
     "sphinx-markdown-builder>=0.6.8",
     "sphinx>=7.4.7",
+]
+
+[project.optional-dependencies]
+gen = [
+    "langchain-ollama>=0.2.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "sphinx-autobuild>=2024.10.3",
 ]
 
 [project.urls]
@@ -37,7 +47,7 @@ Source = "https://github.com/jacobtomlinson/sphinx-llm"
 source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "_version.py"
+version-file = "src/sphinx_llm/_version.py"
 
 [tool.hatch.envs.types]
 extra-dependencies = ["mypy>=1.0.0"]
@@ -56,9 +66,3 @@ tests = ["tests", "*/sphinx-llm/tests"]
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.1",
-    "sphinx-autobuild>=2024.10.3",
-]

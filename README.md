@@ -15,7 +15,10 @@ The other category is extensions for making your documentation easier for consum
 ## Installation
 
 ```console
-pip install git+https://github.com/jacobtomlinson/sphinx-llm.git
+pip install sphinx-llm
+
+# For extensions that use LLMs to generate text
+pip install sphinx-llm[gen]
 ```
 
 ## Extensions
