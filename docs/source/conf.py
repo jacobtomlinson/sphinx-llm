@@ -15,6 +15,7 @@ author = 'Jacob Tomlinson'
 
 extensions = [
     "sphinx_llm.docref",
+    "sphinx_llm.txt",
 ]
 
 sphinx_llm_options = {
