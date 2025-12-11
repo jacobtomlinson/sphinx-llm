@@ -65,7 +65,7 @@ class MarkdownGenerator:
 
         if not self.md_build_process:
             logger.warning(
-                "Markdown build process not found, skipping build combination"
+                "Markdown build process not found, skipping build output combination"
             )
             return
 
@@ -77,8 +77,9 @@ class MarkdownGenerator:
         if self.md_build_process.returncode != 0:
             logger.error(
                 f"Markdown build subprocess failed with return code {self.md_build_process.returncode},"
-                " see {self.md_build_logfile.name} for details"
             )
+            with open(self.md_build_logfile.name, encoding="utf-8") as logfile:
+                logger.error(logfile.read())
             return
 
         try:
@@ -164,7 +165,6 @@ class MarkdownGenerator:
             # Copy the file with the new name
             shutil.copy2(md_file, target_file)
             self.generated_markdown_files.append(target_file)
-            logger.info(f"Generated context file: {target_file}")
 
         logger.info(f"Generated {len(self.generated_markdown_files)} context files")
 
