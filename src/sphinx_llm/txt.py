@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any, Union
 
 from sphinx.application import Sphinx
+from sphinx.errors import ExtensionError
 from sphinx.util import logging
 
 from .version import __version__
@@ -46,6 +47,15 @@ class MarkdownGenerator:
         self.outdir = Path(app.builder.outdir)
         self.md_build_dir = self.outdir / "_markdown_build"
         self.parallel = getattr(self.app.config, "llms_txt_build_parallel", True)
+        self.suffix_mode = getattr(self.app.config, "llms_txt_suffix_mode", "both")
+
+        # Validate suffix_mode configuration
+        valid_modes = {"file-suffix", "url-suffix", "both"}
+        if self.suffix_mode not in valid_modes:
+            raise ExtensionError(
+                f"Invalid llms_txt_suffix_mode: {self.suffix_mode!r}. "
+                f"Must be one of {valid_modes}"
+            )
 
         if app.builder and app.builder.name == "markdown":
             return
@@ -161,33 +171,86 @@ class MarkdownGenerator:
             base_name = rel_path.stem
             new_name = f"{base_name}.html.md"
 
-            # Determine target file location based on builder and file type
+            # Determine target file locations based on builder and file type
+            target_files = []
+            # Track the primary file for llms-full.txt and llms.txt (to avoid duplicates)
+            primary_target = None
+
             if self.app.builder and self.app.builder.name == "dirhtml":
                 # dirhtml builder has special handling for index files
                 if base_name == "index" and rel_path.parent == Path("."):
                     # Root index file
-                    target_file = self.outdir / new_name
+                    file_suffix_target = self.outdir / new_name  # index.html.md
+                    url_suffix_target = self.outdir / "index.md"  # index.md
+
+                    if self.suffix_mode == "file-suffix":
+                        target_files.append(file_suffix_target)
+                        primary_target = file_suffix_target
+                    elif self.suffix_mode == "url-suffix":
+                        target_files.append(url_suffix_target)
+                        primary_target = url_suffix_target
+                    elif self.suffix_mode == "both":
+                        target_files.extend([file_suffix_target, url_suffix_target])
+                        # Use file-suffix as primary for llms-full.txt and llms.txt (spec-compliant)
+                        primary_target = file_suffix_target
                 elif base_name == "index":
-                    # Nested index file
-                    target_file = self.outdir / rel_path.parent / new_name
+                    # Nested index file (e.g., subdir/index.rst)
+                    file_suffix_target = (
+                        self.outdir / rel_path.parent / new_name
+                    )  # subdir/index.html.md
+                    url_suffix_target = (
+                        self.outdir / f"{rel_path.parent}.md"
+                    )  # subdir.md
+
+                    if self.suffix_mode == "file-suffix":
+                        target_files.append(file_suffix_target)
+                        primary_target = file_suffix_target
+                    elif self.suffix_mode == "url-suffix":
+                        target_files.append(url_suffix_target)
+                        primary_target = url_suffix_target
+                    elif self.suffix_mode == "both":
+                        target_files.extend([file_suffix_target, url_suffix_target])
+                        # Use file-suffix as primary for llms-full.txt and llms.txt (spec-compliant)
+                        primary_target = file_suffix_target
                 else:
-                    # Non-index file gets its own directory
-                    target_file = (
+                    # Non-index file gets different treatment based on suffix mode
+                    # File-suffix mode: foo/index.html.md
+                    file_suffix_target = (
                         self.outdir / rel_path.with_suffix("") / "index.html.md"
                     )
+                    # URL-suffix mode: foo.md
+                    url_suffix_target = self.outdir / rel_path.with_suffix(".md")
+
+                    if self.suffix_mode == "file-suffix":
+                        target_files.append(file_suffix_target)
+                        primary_target = file_suffix_target
+                    elif self.suffix_mode == "url-suffix":
+                        target_files.append(url_suffix_target)
+                        primary_target = url_suffix_target
+                    elif self.suffix_mode == "both":
+                        target_files.extend([file_suffix_target, url_suffix_target])
+                        # Use file-suffix as primary for llms-full.txt and llms.txt (spec-compliant)
+                        primary_target = file_suffix_target
             else:
                 # Other builders use simpler path structure
                 if rel_path.parent != Path("."):
                     target_file = self.outdir / rel_path.parent / new_name
                 else:
                     target_file = self.outdir / new_name
+                target_files.append(target_file)
+                primary_target = target_file
 
-            # Ensure target directory exists
-            target_file.parent.mkdir(parents=True, exist_ok=True)
+            # Copy the file to all target locations
+            for target_file in target_files:
+                # Ensure target directory exists
+                target_file.parent.mkdir(parents=True, exist_ok=True)
 
-            # Copy the file with the new name
-            shutil.copy2(md_file, target_file)
-            self.generated_markdown_files.append(target_file)
+                # Copy the file with the new name
+                shutil.copy2(md_file, target_file)
+
+            # Only add the primary target to generated_markdown_files to avoid duplicates in llms-full.txt
+            if primary_target:
+                self.generated_markdown_files.append(primary_target)
 
         logger.info(f"Generated {len(self.generated_markdown_files)} context files")
 
@@ -341,6 +404,7 @@ def setup(app: Sphinx) -> dict[str, Any]:
     """Set up the Sphinx extension."""
     app.add_config_value("llms_txt_description", "", "env")
     app.add_config_value("llms_txt_build_parallel", True, "env")
+    app.add_config_value("llms_txt_suffix_mode", "both", "env")
     generator = MarkdownGenerator(app)
     generator.setup()
 
