@@ -4,6 +4,8 @@
 Tests for the sphinx_llm.txt module.
 """
 
+from __future__ import annotations
+
 import re
 import tempfile
 from collections.abc import Generator
