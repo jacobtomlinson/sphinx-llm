@@ -379,6 +379,16 @@ class MarkdownGenerator:
                     f"- [{title}]({url}): {self.get_page_description(md_file)}\n"
                 )
 
+            # Link to llms-full.txt when it was also generated
+            if getattr(self.app.config, "llms_txt_full_build", True):
+                if http_base:
+                    full_url = f"{http_base}/llms-full.txt"
+                else:
+                    full_url = "llms-full.txt"
+                sitemap.write(
+                    f"\n---\n\nFor more comprehensive documentation, see [llms-full.txt]({full_url})\n"
+                )
+
             logger.info(f"Created llms.txt sitemap: {llms_txt_path}")
 
     def extract_title_from_markdown(self, md_file: Path) -> str:

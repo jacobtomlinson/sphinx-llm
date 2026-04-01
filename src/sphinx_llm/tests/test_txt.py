@@ -449,6 +449,43 @@ def test_markdown_files_still_created_when_full_disabled(sphinx_build_no_llms_fu
         )
 
 
+_LLMS_FULL_FOOTER_PREFIX = "For more comprehensive documentation, see [llms-full.txt]("
+
+
+def test_llms_txt_links_to_llms_full_txt(sphinx_build):
+    """Test that llms.txt ends with a footer link to llms-full.txt when it is generated."""
+    app, build_dir, _ = sphinx_build
+
+    content = (build_dir / "llms.txt").read_text(encoding="utf-8")
+    lines = content.rstrip("\n").split("\n")
+
+    http_base = (getattr(app.config, "markdown_http_base", "") or "").rstrip("/")
+    expected_url = f"{http_base}/llms-full.txt" if http_base else "llms-full.txt"
+    expected_footer = (
+        f"For more comprehensive documentation, see [llms-full.txt]({expected_url})"
+    )
+
+    assert lines[-1] == expected_footer, (
+        f"Last line of llms.txt should be the footer link.\nExpected: {expected_footer!r}\nGot: {lines[-1]!r}"
+    )
+
+
+@pytest.mark.parametrize(
+    "sphinx_build_no_llms_full",
+    ["html", "dirhtml"],
+    indirect=True,
+)
+def test_llms_txt_does_not_link_to_llms_full_when_disabled(sphinx_build_no_llms_full):
+    """Test that llms.txt has no llms-full.txt footer when llms_txt_full_build=False."""
+    _, build_dir, _ = sphinx_build_no_llms_full
+
+    content = (build_dir / "llms.txt").read_text(encoding="utf-8")
+    last_line = content.rstrip("\n").split("\n")[-1]
+    assert not last_line.startswith(_LLMS_FULL_FOOTER_PREFIX), (
+        "llms.txt should not end with the llms-full.txt footer when llms_txt_full_build is disabled"
+    )
+
+
 # ---------------------------------------------------------------------------
 # html_meta description tests
 # ---------------------------------------------------------------------------
